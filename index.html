@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>OCR PWA</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/jquery.Jcrop.min.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+<body class="step1">
+
+<div class="container">
+    <div class="alert alert-danger"><strong>Oops!</strong> <span></span></div>
+    <div class="jumbotron">
+         
+        <div id="step1">
+
+                <div id="login" class="modal">
+
+                        <!-- Modal content -->
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <p id ="dropzone">Drop your Keyfile to Login</p>
+                            <div class="file-input">
+                                <input type="file" id="file" onchange="login(this.files)">
+                            </div>
+                        </div>
+            
+                    </div>
+
+                   
+
+            <h1><i class="glyphicon glyphicon-camera"></i></h1>
+
+            <p class="lead">
+                Please take a picture of printed text (The larger and clearer the better).
+            </p>
+
+            <figure class="not-ready">
+                <video autoplay></video>
+            </figure>
+
+            <button class="btn btn-lg btn-success" id="llogin" type="button">Login</button>
+            <button class="btn btn-lg btn-success" disabled id="takePicture">Take a picture</button>
+            
+            <script>
+                    var modal = document.getElementById("login");
+        
+                    var btn = document.getElementById("llogin");
+        
+                    var span = document.getElementsByClassName("close")[0];
+        
+                    btn.onclick = function() {
+                        modal.style.display = "block";
+                    }
+        
+                    span.onclick = function() {
+                        modal.style.display = "none";
+                    }
+        
+                    window.onclick = function(event) {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    }
+
+                    function login(files) {
+const fr = new FileReader()
+fr.onload = function (ev) {
+    try {
+         wallet = JSON.parse(ev.target.result);
+
+        arweave.wallets.jwkToAddress(wallet).then((address) => {
+            console.log(`Arweave wallet address: ${address}`)
+
+            
+            document.getElementById("llogin").textContent = "Logged In";
+            
+
+
+            arweave.wallets.getBalance(address).then((balance) => {
+                let winston = balance;
+                let ar = arweave.ar.winstonToAr(balance);
+
+                console.log(winston);
+
+                console.log(ar);
+
+                document.getElementById("dropzone").innerHTML = address + "<br><b>Balance:</b> " + ar + " <b>AR Tokens</b>";
+            });
+        });
+
+    } catch (err) {
+        console.log('Error logging in: ', err);
+    }
+    
+
+};
+
+fr.readAsText(files[0]);
+}
+                </script>
+        </div>
+        <div id="step2">
+            <h1><i class="glyphicon glyphicon-pencil"></i></h1>
+
+            <p class="lead">
+                Crop the picture and adjust it so that text is clearly visible.
+            </p>
+
+            <figure>
+                <canvas style="display:none"></canvas>
+                <img src=""/>
+            </figure>
+
+            <p>Brightness: <input type="range" min="0" max="100" id="brightness" value="20"></p>
+
+            <p>Contrast: <input type="range" min="0" max="100" id="contrast" value="90"></p>
+
+            <button class="btn btn-lg btn-success" id="adjust" disabled>Done</button>
+        </div>
+        <div id="step3">
+            <h1><i class="glyphicon glyphicon-text-height"></i></h1>
+
+            <p class="lead">Here is the recognized text.</p>
+
+            <figure>
+                <canvas></canvas>
+            </figure>
+
+            <blockquote>
+                <div class="spinner">
+                    <div class="bounce1"></div>
+                    <div class="bounce2"></div>
+                    <div class="bounce3"></div>
+                </div>
+                <p id="result"></p>
+                <footer></footer>
+            </blockquote>
+
+            <button class="btn btn-lg btn-success" id="go-back">Go back</button>
+            <button class="btn btn-lg btn-success" id="start-over">Start over</button>
+            <button class="btn btn-lg btn-success" id="save">Save</button>
+
+            <script>
+            let save = document.getElementById("save");
+
+            save.addEventListener("click", saveResult)
+            
+            function saveResult()
+    {
+        var obj = { result : result.innerHTML,
+                
+                  };
+
+    localStorage.setItem('myObj', JSON.stringify(obj));
+
+    (async () => {
+
+        var tx =
+            await arweave.createTransaction(
+            {
+                data: JSON.stringify(obj),
+            },
+                wallet,
+        )
+
+        tx.addTag('App-Name', 'OCReader_PWA')
+        tx.addTag('App-Version', '0.0.1')
+        await arweave.transactions.sign(tx, wallet)
+        console.log(tx.id)
+        console.log(tx.data)
+        await arweave.transactions.post(tx)
+        alert('Result Saved to the Permaweb')
+
+    })()
+}
+            </script>
+
+        </div>
+    </div>
+
+    <div class="header">
+        <ul class="nav nav-pills pull-right">
+            <li class="active"><a href="#" data-step="1">#1 <i class="glyphicon glyphicon-camera"></i></a></li>
+            <li class="disabled"><a href="#" data-step="2">#2 <i class="glyphicon glyphicon-pencil"></i></a></li>
+            <li class="disabled"><a href="#" data-step="3">#3 <i class="glyphicon glyphicon-text-height"></i></a></li>
+        </ul>
+        <h3 class="text-muted">Optical Character Recognition PWA</h3>
+    </div>
+
+        <div>
+            <h4>Support</h4>
+
+            <p>This OCR PWA requires <a href="http://caniuse.com/stream">getUserMedia</a> and <a
+                    href="http://caniuse.com/webgl">WebGL</a>. 
+        </div>
+    </div>
+
+
+</div>
+<!-- /container -->
+
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="js/vendor/modernizr.min.js"></script>
+<!-- <script src="js/vendor/bootstrap.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="js/vendor/jquery.Jcrop.js"></script>
+<script src='https://cdn.jsdelivr.net/gh/naptha/tesseract.js@v1.0.14/dist/tesseract.min.js'></script>
+<script src="js/vendor/glfx.min.js"></script>
+<script src="https://unpkg.com/arweave/bundles/web.bundle.js"></script>
+<script src="https://unpkg.com/arweave/bundles/web.bundle.min.js"></script>
+<script>
+    var wallet = {};
+    var arweave = Arweave.init({
+        host: 'arweave.net',
+        port: 443,
+        protocol: 'https',
+        timeout: 20000,
+        logging: false,
+    });
+    arweave.network.getInfo().then(console.log);
+</script>
+
+<script src="js/main.js"></script>
+    
+</body>
+</html>
