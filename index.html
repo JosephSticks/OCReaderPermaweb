@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/bootstrap.min.css"/>
     <link rel="stylesheet" href="css/jquery.Jcrop.min.css"/>
     <link rel="stylesheet" href="css/main.css"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 </head>
 <body class="step1">
@@ -103,6 +103,24 @@ fr.onload = function (ev) {
 
 };
 
+let get_uploads =
+            {
+                op: 'and',
+                        expr1:
+                            {
+                                op: 'equals',
+                                expr1: 'from',
+                                expr2: wallet
+                            },
+                        expr2:
+                            {
+                                op: 'equals',
+                                expr1: 'App-Name',
+                                expr2: 'OCReader_PWA'
+                            }
+            };
+        // const txs = await arweave.api.post(arql, get_uploads);
+        console.log(get_uploads)
 fr.readAsText(files[0]);
 }
                 </script>
@@ -155,15 +173,13 @@ fr.readAsText(files[0]);
             
             function saveResult()
     {
-        var obj = { result : result.innerHTML,
-                
-                  };
+        var obj = { result : result.innerHTML};
 
     localStorage.setItem('myObj', JSON.stringify(obj));
 
     (async () => {
 
-        var tx =
+        const tx =
             await arweave.createTransaction(
             {
                 data: JSON.stringify(obj),
