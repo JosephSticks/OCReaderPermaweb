@@ -77,6 +77,27 @@ fr.onload = function (ev) {
          wallet = JSON.parse(ev.target.result);
 
         arweave.wallets.jwkToAddress(wallet).then((address) => {
+
+            
+        let get_uploads =
+            {
+                op: 'and',
+                        expr1:
+                            {
+                                op: 'equals',
+                                expr1: 'from',
+                                expr2: address
+                            },
+                        expr2:
+                            {
+                                op: 'equals',
+                                expr1: 'App-Name',
+                                expr2: 'OCReader_PWA'
+                            }
+            };
+        // const txs = await arweave.api.post('arql', get_uploads);
+        console.log(get_uploads)
+
             console.log(`Arweave wallet address: ${address}`)
 
             
@@ -103,24 +124,7 @@ fr.onload = function (ev) {
 
 };
 
-let get_uploads =
-            {
-                op: 'and',
-                        expr1:
-                            {
-                                op: 'equals',
-                                expr1: 'from',
-                                expr2: wallet
-                            },
-                        expr2:
-                            {
-                                op: 'equals',
-                                expr1: 'App-Name',
-                                expr2: 'OCReader_PWA'
-                            }
-            };
-        // const txs = await arweave.api.post(arql, get_uploads);
-        console.log(get_uploads)
+
 fr.readAsText(files[0]);
 }
                 </script>
